@@ -7,7 +7,7 @@ class Parser
     const S_NAME = 1;
     const S_JSON = 2;
 
-    public function parseClass($class)
+    public function parseClass($class, $propertyFilter=null, $methodFilter=null)
     {
         if (!$class instanceof \ReflectionClass) {
             $class = new \ReflectionClass($class);
@@ -26,12 +26,20 @@ class Parser
             }
         }
 
-        $info->methods = $this->parseReflectors($class->getMethods());
-        $info->properties = $this->parseReflectors($class->getProperties());
+        $info->methods = $this->parseReflectors(
+            $methodFilter === null
+                ? $class->getMethods()
+                : $class->getMethods($methodFilter)
+        );
+        $info->properties = $this->parseReflectors(
+            $propertyFilter === null
+                ? $class->getProperties()
+                : $class->getProperties($propertyFilter)
+        );
         
         return $info;
     }
-    
+
     public function parseReflectors($reflectors)
     {
         $notes = array();

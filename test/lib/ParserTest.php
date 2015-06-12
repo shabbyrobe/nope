@@ -200,6 +200,49 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
         $parsed = $this->parser->parse($in);
     }
+
+    public function testParseInheritance()
+    {
+        $info = $this->parser->parseClass(new \ReflectionClass(__NAMESPACE__.'\ParserTestChildClass'));
+        $expected = (object)array(
+            'notes'=>array('c2'=>['cv2'=>true], 'c3'=>['cv3'=>true]),
+            'methods'=>array(
+                'method1'=>array('m1'=>['mv1'=>true], 'm2'=>['mv2'=>true]),
+                'method2'=>array('m5'=>['mv5'=>true], 'm6'=>['mv6'=>true]),
+                'method3'=>array('m7'=>['mv7'=>true], 'm8'=>['mv8'=>true]),
+            ),
+            'properties'=>array(
+                'property1'=>array('p1'=>['pv1'=>true], 'p2'=>['pv2'=>true]),
+                'property2'=>array('p5'=>['pv5'=>true], 'p6'=>['pv6'=>true]),
+                'property3'=>array('p7'=>['pv7'=>true], 'p8'=>['pv8'=>true]),
+            ),
+        );
+
+        $this->assertEquals($expected, $info);
+    }
+
+    public function testParseFilters()
+    {
+        $info = $this->parser->parseClass(
+            new \ReflectionClass(__NAMESPACE__.'\ParserTestChildClass'),
+            \ReflectionMethod::IS_PUBLIC,
+            \ReflectionProperty::IS_PUBLIC
+        );
+
+        $expected = (object)array(
+            'notes'=>array('c2'=>['cv2'=>true], 'c3'=>['cv3'=>true]),
+            'methods'=>array(
+                'method1'=>array('m1'=>['mv1'=>true], 'm2'=>['mv2'=>true]),
+                'method2'=>array('m5'=>['mv5'=>true], 'm6'=>['mv6'=>true]),
+            ),
+            'properties'=>array(
+                'property1'=>array('p1'=>['pv1'=>true], 'p2'=>['pv2'=>true]),
+                'property2'=>array('p5'=>['pv5'=>true], 'p6'=>['pv6'=>true]),
+            ),
+        );
+
+        $this->assertEquals($expected, $info);
+    }
 }
 
 /**
@@ -231,4 +274,35 @@ class ParserTestClass
      * :m4 = {"mv4": true};
      */
     public function method2() {}
+}
+
+/**
+ * :c2 = {"cv2": true};
+ * :c3 = {"cv3": true};
+ */
+class ParserTestChildClass extends ParserTestClass
+{
+    /**
+     * :p5 = {"pv5": true};
+     * :p6 = {"pv6": true};
+     */
+    public $property2;
+
+    /**
+     * :p7 = {"pv7": true};
+     * :p8 = {"pv8": true};
+     */
+    protected $property3;
+
+    /**
+     * :m5 = {"mv5": true};
+     * :m6 = {"mv6": true};
+     */
+    public function method2() {}
+
+    /**
+     * :m7 = {"mv7": true};
+     * :m8 = {"mv8": true};
+     */
+    protected function method3() {}
 }
