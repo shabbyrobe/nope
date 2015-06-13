@@ -1,5 +1,5 @@
-Nope! - JSON Annotation Parser for PHP
-======================================
+Nope! - JSON Docblock Annotation Parser for PHP
+===============================================
 
 Specify annotations in docblocs as JSON:
 

@@ -1,6 +1,6 @@
 {
     "name": "shabbyrobe/nope",
-    "description": "Annotation parser",
+    "description": "JSON Docblock Annotation Parser",
     "version": "1.0.1",
     "type": "library",
     "license": "MIT",
