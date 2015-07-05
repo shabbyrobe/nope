@@ -52,13 +52,8 @@ Result::
         [notes] => array (
             'c1' => array (
                 'foo' => true
-                'bar' => array (
-                    '0' => 'baz'
-                    '1' => 'qux'
-                )
-                'ding' => array (
-                    'dong' => 'woohoo'
-                )
+                'bar' => array ( '0' => 'baz' '1' => 'qux' )
+                'ding' => array ( 'dong' => 'woohoo' )
             )
             'c2' => array ( 'foo' => false )
         )
