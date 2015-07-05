@@ -9,27 +9,21 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->parser = new \Nope\Parser;
     }
     
-    /**
-     * @covers Nope\Parser::parse
-     */
+    /** @covers Nope\Parser::parse */
     public function testParseSingleValuelessNote()
     {
         $parsed = $this->parser->parse(':note = {};');
         $this->assertEquals(array('note'=>[]), $parsed);
     }
  
-    /**
-     * @covers Nope\Parser::parse
-     */
+    /** @covers Nope\Parser::parse */
     public function testParseSingleValueNote()
     {
         $parsed = $this->parser->parse(':note = {"foo": "bar"};');
         $this->assertEquals(array('note'=>["foo"=>"bar"]), $parsed);
     }
 
-    /**
-     * @covers Nope\Parser::parse
-     */
+    /** @covers Nope\Parser::parse */
     public function testParseManyNotesMultiline()
     {
         $parsed = $this->parser->parse(
@@ -39,9 +33,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array("one"=>[], "two"=>[]), $parsed);
     }
 
-    /**
-     * @covers Nope\Parser::parse
-     */
+    /** @covers Nope\Parser::parse */
     public function testParseComplexMultilineNote()
     {
         $parsed = $this->parser->parse('

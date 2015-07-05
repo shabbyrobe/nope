@@ -9,9 +9,7 @@ class ParserParseClassTest extends \PHPUnit_Framework_TestCase
         $this->parser = new \Nope\Parser;
     }
     
-    /**
-     * @covers Nope\Parser::parseClass
-     */
+    /** @covers Nope\Parser::parseClass */
     public function testParseClassUsingStringName()
     {
         $info = $this->parser->parseClass(__NAMESPACE__.'\ParserTestClass');

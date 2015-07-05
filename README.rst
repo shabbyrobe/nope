@@ -1,11 +1,19 @@
 Nope! - JSON Docblock Annotation Parser for PHP
 ===============================================
 
-Specify annotations in docblocs as JSON:
+Specify annotations in docblocs as JSON.
+
+Requires PHP 5.4 or greater. Install using ``composer``::
+
+    composer require shabbyrobe/nope
+
+This example demonstrates almost all of what *Nope* has to offer:
 
 .. code-block:: php
 
     <?php
+    require 'vendor/autoload.php';
+   
     /**
      * Hellos your hellos
      *
@@ -31,7 +39,11 @@ Specify annotations in docblocs as JSON:
     }
    
     $parser = new Nope\Parser();
+    $t = microtime(true);
     $out = $parser->parseClass('Hello');
+   
+    var_dump($out);
+    var_dump(microtime(true) - $t);
 
 
 Result::
@@ -48,25 +60,23 @@ Result::
                     'dong' => 'woohoo'
                 )
             )
-            'c2' => array (
-                'foo' => false
-            )
+            'c2' => array ( 'foo' => false )
         )
         [methods] => array (
             'world' => array(
-                'm1' => array (
-                    'foo' => true
-                )
+                'm1' => array ( 'foo' => true )
             )
         )
         [properties] => array (
             'pants' => array (
-                'p1' => array (
-                    'pants' => true
-                )
+                'p1' => array ( 'pants' => true )
             )
         )
     )
+    float(0.00057697296142578)
+
+It's plenty quick, but you will still probably want to cache that result on a production
+server.
 
 *Nope* annotations follow a simple format::
 
@@ -74,7 +84,7 @@ Result::
      * :namespace = JSON;
      */
 
-The parsing rules are very simple:
+The parsing rules are straightforward:
 
 - Docblock margins are stripped away.
 
