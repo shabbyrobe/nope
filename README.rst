@@ -88,19 +88,17 @@ The parsing rules are straightforward:
 - Everything from the colon to the ``=`` sign (excluding trailing whitespace) is taken as the
   **namespace**.
 
-- Anything after the ``=`` sign (excluding leading whitespace) must be a valid JSON.
-  Parsing ends when a ``;`` is encountered as the last character on a line.
+- Anything after the ``=`` sign (excluding leading whitespace) **must be valid JSON**.
+  Parsing ends when a ``;`` is encountered as the **last** character on a line.
 
 - Multiple annotations are parsed, but if you specify the same namespace twice, the second
-  definition will overwrite the first.
+  definition will *overwrite* the first.
 
 Everything else inside a docblock is ignored, so this should not interfere with your
 documentation.
 
-If you need a line in your docblock to start with ``:``, escape it with a backslash: ``\:``.
-
-Multiple annotations cannot exist on the same line. The ``:`` character must be at the
-start of a line (excluding docblock margins) and the ``;`` character must be at the end.
+If you need a line in your docblock to start with ``:``, **escape** it with a backslash:
+``\:``.
 
 Due to the fortunate property that JSON strings cannot span multiple lines, it is not
 possible for the string ``;\n`` to appear anywhere inside valid JSON. This is the property
@@ -112,7 +110,6 @@ by *Nope*:
     <?php
     /** :foo = true; :bar = true; */
     function impossible() {}
-
 
 Please, please, please be careful when adding new namespaces to your libraries and
 applications. Ideally, you should define one namespace for your entire application and
