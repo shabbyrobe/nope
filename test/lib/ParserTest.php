@@ -79,7 +79,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     {
         $in = ":foo = :bar = {};";
         $this->setExpectedException(
-            \Nope\Exception::class, 
+            "Nope\Exception",
             "JSON parsing failed for 'foo' - Parse error on line 1:\n".
             ":bar = {}\n".
             "^"
@@ -107,7 +107,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     public function testParseEmptyNameFails($in)
     {
         $this->setExpectedException(
-            \Nope\Exception::class, 
+            "Nope\Exception",
             "Unexpected token '=', expected annotation name"
         );
         $parsed = $this->parser->parse($in);
@@ -125,7 +125,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     {
         $in = ":foo";
         $this->setExpectedException(
-            \Nope\Exception::class, 
+            "Nope\Exception",
             "Unexpected end of definition for key 'foo'"
         );
         $parsed = $this->parser->parse($in);
@@ -135,7 +135,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     {
         $in = ':foo = {"baz';
         $this->setExpectedException(
-            \Nope\Exception::class, 
+            "Nope\Exception",
             "Unexpected end of JSON for key 'foo'"
         );
         $parsed = $this->parser->parse($in);

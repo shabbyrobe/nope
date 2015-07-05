@@ -15,7 +15,7 @@
         "psr-4": { "Nope\\": "src/" }
     },
     "require": {
-        "php": ">=5.6.0",
+        "php": ">=5.4.0",
         "seld/jsonlint": "*"
     },
     "require-dev": {
