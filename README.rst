@@ -1,5 +1,5 @@
-Nope! - Annotation Parser for PHP
-=================================
+Nope! - JSON Docblock Annotation Parser for PHP
+===============================================
 
 Specify annotations in docblocs as JSON:
 
@@ -94,22 +94,37 @@ documentation.
 
 If you need a line in your docblock to start with ``:``, escape it with a backslash: ``\:``.
 
-PLEASE don't create too many annotations at the namespace level, i.e. using ``:``. If your
-project requires many annotations, please group them inside a single ``:namespace``.
+Multiple annotations cannot exist on the same line. The ``:`` character must be at the
+start of a line (excluding docblock margins) and the ``;`` character must be at the end.
 
-Do this::
+Due to the fortunate property that JSON strings cannot span multiple lines, it is not
+possible for the string ``;\n`` to appear anywhere inside valid JSON. This is the property
+we exploit to make *Nope* possible. So the following example cannot be parsed successfully
+by *Nope*:
 
-    :myproj = {
-        "this": "foo",
-        "that": "bar",
-        "theother": "hello",
-    };
+.. code-block:: php
 
-Please don't do this::
+    <?php
+    /** :foo = true; :bar = true; */
+    function impossible() {}
 
-    :this = "foo";
-    :that = "bar";
-    :theother = "hello";
+
+Please, please, please be careful when adding new namespaces to your libraries and
+applications. Ideally, you should define one namespace for your entire application and
+embed your annotations as an object inside that. This solves the "one annotation per line"
+problem as well:
+
+.. code-block:: php
+
+    <?php
+    /** :myapp = {"foo": "bar", "baz": "qux"}; */
+    function good() {}
+   
+    /**
+     * :foo = "bar";
+     * :baz = "qux";
+     */
+    function please_dont() {}
 
 
 API
@@ -186,6 +201,27 @@ Parse all annotations from a string:
     );
 
 
+Parse all annotations from an array of Reflectors (must support the ``name`` property and
+the ``getDocComment()`` method):
+
+.. code-block:: php
+
+    <?php
+    $rc = new ReflectionClass('Pants');
+    $notes = $parser->parseReflectors($rc->getMethods(ReflectionMethod::IS_STATIC));
+
+
+Method and property filters can be passed to ``parseClass``:
+
+.. code-block:: php
+
+    <?php
+    $rc = new ReflectionClass('Pants');
+    $notes = $parser->parseClass(
+        \Pants::class, 
+        \ReflectionProperty::IS_PUBLIC,
+        \ReflectionMethod::IS_STATIC
+    );
 
 
 Isn't this a solved problem?
@@ -204,20 +240,23 @@ A common approach is to define a complex new language. These languages are often
 different from vanilla PHP, which imposes a cognitive load each time you have to switch in
 and out of using them. You also tend to write annotations far less frequently than you
 write other code, so there is much time spent looking at manuals to fill in the blanks.
+
 They also require complex PHP-based implementations of slow parsers to even be read in the
 first place. I have remained uncomfortable with these kinds of solutions for a long time -
 they are far too slow and have way too many moving parts.
 
 I've even had two failed attempts at a leaner alternative to this in my Data Mapper
 project `Amiss <http://github.com/shabbyrobe/amiss>`_ (see v3 and v4), both of which fell
-down because they were too unfamiliar and inflexible.
+down because they were too unfamiliar and/or inflexible.
 
-PHP isn't a great language to implement complex parsers when performance is a primary
-conern. There are, however, a few functions in the PHP standard library that parse strings
-into complex array structures using C-based implementations.
+I've remained convinced that there was a native C-based solution to this lurking in PHP's
+standard library for a good long while, and I'm stunned that it took me this long to
+realise ``json_decode`` has been staring me in the face the whole time.
 
-``json_decode`` is a good fit for this job. It's unambiguous, ubiquitous and there is a
-fast C-based parser available to PHP in a single function call. *Nope* takes advantage of
-these properties by finding a way to unambiguously embed JSON into the unstructured text
-strings you find in doc comments.
+It's a perfect fit for the job: it can represent complex data structures that map well to
+pure PHP, the language is ubiquitous and widely understood, and there is a fast C-based
+parser available to PHP in a single function call.
+
+*Nope* takes advantage of these properties by finding a way to unambiguously embed JSON
+into the unstructured text strings you find in doc comments.
 
