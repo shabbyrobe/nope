@@ -10,28 +10,6 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     }
     
     /**
-     * @covers Nope\Parser::parseClass
-     * @covers Nope\Parser::parseReflectors
-     */
-    public function testParseFullClass()
-    {
-        $info = $this->parser->parseClass(new \ReflectionClass(__NAMESPACE__.'\ParserTestClass'));
-        $expected = (object)array(
-            'notes'=>array('c1'=>['cv1'=>true], 'c2'=>['cv2'=>true]),
-            'methods'=>array(
-                'method1'=>array('m1'=>['mv1'=>true], 'm2'=>['mv2'=>true]),
-                'method2'=>array('m3'=>['mv3'=>true], 'm4'=>['mv4'=>true]),
-            ),
-            'properties'=>array(
-                'property1'=>array('p1'=>['pv1'=>true], 'p2'=>['pv2'=>true]),
-                'property2'=>array('p3'=>['pv3'=>true], 'p4'=>['pv4'=>true]),
-            ),
-        );
-
-        $this->assertEquals($expected, $info);
-    }
-    
-    /**
      * @covers Nope\Parser::parse
      */
     public function testParseSingleValuelessNote()
@@ -76,46 +54,6 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['one'=>['is'=>['pants'=>true], 'so'=>[1, 2, 3]]], $parsed);
     }
 
-    /**
-     * @covers Nope\Parser::stripDocComment
-     */
-    public function testStripDocCommentMultiline()
-    {
-        $parsed = $this->parser->stripDocComment(implode("\n", [
-            "/**",
-            " * foo",
-            "   *     bar",
-            "baz",
-            "*/",
-        ]));
-
-        // only the first whitespace after the * is stripped:
-        $expected = "foo\n    bar\nbaz";
-        $this->assertEquals($expected, $parsed);
-    }
-
-    /**
-     * @covers Nope\Parser::stripDocComment
-     */
-    public function testStripDocCommentFromNonDocblock()
-    {
-        // /* */ instead of /** */
-        $parsed = $this->parser->stripDocComment(
-            "/*\n * foo\n*/"
-        );
-        $this->assertEquals("foo", $parsed);
-    }
-    
-    /**
-     * @covers Nope\Parser::stripDocComment
-     */
-    public function testStripDocCommentWorksWhenInputIsNotComment()
-    {
-        $data = "foo\nbar\nbaz";
-        $parsed = $this->parser->stripDocComment($data);
-        $this->assertEquals($data, $parsed);
-    }
-
     public function testParseIgnoresEscapedKey()
     {
         $in = "\:foo = {}";
@@ -142,7 +80,9 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $in = ":foo = :bar = {};";
         $this->setExpectedException(
             \Nope\Exception::class, 
-            "JSON parsing failed for foo: Syntax error"
+            "JSON parsing failed for 'foo' - Parse error on line 1:\n".
+            ":bar = {}\n".
+            "^"
         );
         $parsed = $this->parser->parse($in);
     }
@@ -240,35 +180,4 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $parsed = $this->parser->parse($in);
         $this->assertEquals(["foo"=>123, "bar"=>45.6], $parsed);
     }
-}
-
-/**
- * :c1 = {"cv1": true};
- * :c2 = {"cv2": true};
- */
-class ParserTestClass
-{
-    /**
-     * :p1 = {"pv1": true};
-     * :p2 = {"pv2": true};
-     */
-    public $property1;
-    
-    /**
-     * :p3 = {"pv3": true};
-     * :p4 = {"pv4": true};
-     */
-    public $property2;
-
-    /**
-     * :m1 = {"mv1": true};
-     * :m2 = {"mv2": true};
-     */
-    public function method1() {}
-
-    /**
-     * :m3 = {"mv3": true};
-     * :m4 = {"mv4": true};
-     */
-    public function method2() {}
 }

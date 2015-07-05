@@ -1,13 +1,15 @@
 <?php
 namespace Nope;
 
+use Seld\JsonLint\JsonParser;
+
 class Parser
 {
     const S_NONE = 0;
     const S_NAME = 1;
     const S_JSON = 2;
 
-    public function parseClass($class)
+    public function parseClass($class, $propertyFilter=null, $methodFilter=null)
     {
         if (!$class instanceof \ReflectionClass) {
             $class = new \ReflectionClass($class);
@@ -22,16 +24,24 @@ class Parser
                 $info->notes = $this->parse($this->stripDocComment($doc));
             }
             catch (Exception $ex) {
-                throw new Exception("Failed parsing class docblock {$class->name}: ".$ex->getMessage(), null, $ex);
+                throw new Exception("Failed parsing class docblock '{$class->name}'. ".$ex->getMessage(), null, $ex);
             }
         }
 
-        $info->methods = $this->parseReflectors($class->getMethods());
-        $info->properties = $this->parseReflectors($class->getProperties());
+        $info->methods = $this->parseReflectors(
+            $methodFilter === null
+                ? $class->getMethods()
+                : $class->getMethods($methodFilter)
+        );
+        $info->properties = $this->parseReflectors(
+            $propertyFilter === null
+                ? $class->getProperties()
+                : $class->getProperties($propertyFilter)
+        );
         
         return $info;
     }
-    
+
     public function parseReflectors($reflectors)
     {
         $notes = array();
@@ -46,7 +56,7 @@ class Parser
                     }
                 }
                 catch (Exception $ex) {
-                    throw new Exception("Failed parsing reflector {$r->name}: ".$ex->getMessage(), null, $ex);
+                    throw new Exception("Failed parsing reflector '{$r->name}'. ".$ex->getMessage(), null, $ex);
                 }
             }
         }
@@ -119,7 +129,9 @@ class Parser
         foreach ($parsed as $key=>$json) {
             $cur = json_decode($json, !!'assoc');
             if ($cur === null && ($err = json_last_error())) {
-                throw new Exception("JSON parsing failed for $key: ".json_last_error_msg());
+                $parser = new JsonParser();
+                $message = $parser->lint(trim($json))->getMessage();
+                throw new Exception("JSON parsing failed for '$key' - ".$message);
             }
             $out[$key] = $cur;
         }
