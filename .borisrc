@@ -1,0 +1,10 @@
+<?php
+require __DIR__."/vendor/autoload.php";
+define('NOPE_BASE_PATH', __DIR__);
+
+echo "NOPE Boris\n\n";
+echo "A default parser is available at variable \$p\n\n";
+
+$boris->setLocal('p', new \Nope\Parser());
+
+/* vim: set ft=php : */
