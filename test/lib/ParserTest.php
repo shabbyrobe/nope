@@ -200,6 +200,46 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
         $parsed = $this->parser->parse($in);
     }
+
+    public function testParseJSONStrings()
+    {
+        $in = ':foo = "hello";'."\n".
+              ':bar = "world";';
+        $parsed = $this->parser->parse($in);
+        $this->assertEquals(["foo"=>"hello", "bar"=>"world"], $parsed);
+    }
+
+    public function testParseJSONBools()
+    {
+        $in = ':foo = true;'."\n".
+              ':bar = false;';
+        $parsed = $this->parser->parse($in);
+        $this->assertEquals(["foo"=>true, "bar"=>false], $parsed);
+    }
+
+    public function testParseJSONNulls()
+    {
+        $in = ':foo = null;'."\n".
+              ':bar = null;';
+        $parsed = $this->parser->parse($in);
+        $this->assertEquals(["foo"=>null, "bar"=>null], $parsed);
+    }
+
+    public function testParseJSONArrays()
+    {
+        $in = ':foo = [1, 2];'."\n".
+              ':bar = [3, 4];';
+        $parsed = $this->parser->parse($in);
+        $this->assertEquals(["foo"=>[1, 2], "bar"=>[3, 4]], $parsed);
+    }
+
+    public function testParseJSONNumbers()
+    {
+        $in = ':foo = 123;'."\n".
+              ':bar = 45.6;';
+        $parsed = $this->parser->parse($in);
+        $this->assertEquals(["foo"=>123, "bar"=>45.6], $parsed);
+    }
 }
 
 /**
