@@ -9,42 +9,119 @@ class Parser
     const S_NAME = 1;
     const S_JSON = 2;
 
+    private $internalCache = [];
+
+    public function parseHierarchy($class, $propertyFilter=null, $methodFilter=null)
+    {
+        if (!$class instanceof \ReflectionClass) {
+            $class = new \ReflectionClass($class);
+        }
+
+        $key = $class->name.'|'.$propertyFilter.'|'.$methodFilter;
+        if (isset($this->internalCache['hierarchy'][$key])) {
+            return $this->internalCache['hierarchy'][$key];
+        }
+
+        $info = (object)[
+            'hierarchy'  => [],
+            'notes'      => [],
+            'methods'    => [],
+            'properties' => []
+        ];
+
+        // these are so that if 'null' is actually set as the note's value, we can still
+        // detect that we already set it just with isset rather than array_key_exists
+        $setMethods = [];
+        $setProperties = [];
+        $setNotes = [];
+
+        $index = 0;
+        $currentClass = $class;
+        while ($currentClass) {
+            $info->hierarchy[$index] = $current = $this->parseClass($currentClass, $propertyFilter, $methodFilter);
+
+            foreach ($current->notes as $k=>$v) {
+                if (!isset($setNotes[$k])) {
+                    $info->notes[$k] = $v;
+                    $setNotes[$k] = true;
+                }
+            }
+
+            foreach ($current->methods as $name=>$notes) {
+                foreach ($notes as $k=>$v) {
+                    if (!isset($setMethods[$name][$k])) {
+                        $info->methods[$name][$k] = $v;
+                        $setMethods[$name][$k] = true;
+                    }
+                }
+            }
+
+            foreach ($current->properties as $name=>$notes) {
+                foreach ($notes as $k=>$v) {
+                    if (!isset($setProperties[$name][$k])) {
+                        $info->properties[$name][$k] = $v;
+                        $setProperties[$name][$k] = true;
+                    }
+                }
+            }
+
+            $currentClass = $currentClass->getParentClass();
+            ++$index;
+        }
+
+        return $this->internalCache['hierarchy'][$key] = $info;
+    }
+
     public function parseClass($class, $propertyFilter=null, $methodFilter=null)
     {
         if (!$class instanceof \ReflectionClass) {
             $class = new \ReflectionClass($class);
         }
 
-        $info = new \stdClass;
-        $info->notes = null;
-        
-        $doc = $class->getDocComment();
-        if ($doc) {
-            try {
-                $info->notes = $this->parse($this->stripDocComment($doc));
-            }
-            catch (Exception $ex) {
-                throw new Exception("Failed parsing class docblock '{$class->name}'. ".$ex->getMessage(), null, $ex);
-            }
+        $key = $class->name.'|'.$propertyFilter.'|'.$methodFilter;
+        if (isset($this->internalCache['class'][$key])) {
+            return $this->internalCache['class'][$key];
         }
+
+        $info = new \stdClass;
+        $info->notes = $this->parseClassDocBlock($class);
 
         $info->methods = $this->parseReflectors(
             $methodFilter === null
                 ? $class->getMethods()
                 : $class->getMethods($methodFilter)
         );
+
         $info->properties = $this->parseReflectors(
             $propertyFilter === null
                 ? $class->getProperties()
                 : $class->getProperties($propertyFilter)
         );
         
-        return $info;
+        return $this->internalCache['class'][$key] = $info;
+    }
+
+    public function parseClassDocBlock($class)
+    {
+        if (!$class instanceof \ReflectionClass) {
+            $class = new \ReflectionClass($class);
+        }
+
+        $doc = $class->getDocComment();
+        if ($doc) {
+            try {
+                return $this->parse($this->stripDocComment($doc));
+            }
+            catch (Exception $ex) {
+                throw new Exception("Failed parsing class docblock '{$class->name}'. ".$ex->getMessage(), null, $ex);
+            }
+        }
+        return [];
     }
 
     public function parseReflectors($reflectors)
     {
-        $notes = array();
+        $notes = [];
         foreach ($reflectors as $r) {
             $comment = $r->getDocComment();
             $name = $r->name;
