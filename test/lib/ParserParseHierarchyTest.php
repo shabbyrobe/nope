@@ -25,13 +25,18 @@ class ParserParseHierarchyTest extends \PHPUnit_Framework_TestCase
             class Bar extends Foo {}
         ');
 
-        $hierarchy = $this->parser->parseHierarchy($map['Bar']);
-        $expected = [
-            'foo' => 2,
-            'bar' => 2,
-            'baz' => 3,
-        ];
-        $this->assertEquals($expected, $hierarchy->notes);
+        $result = $this->parser->parseHierarchy($map['Bar']);
+        $this->assertEquals(
+            ['foo' => 2, 'bar' => 2, 'baz' => 3],
+            $result->notes);
+
+        $this->assertEquals(
+            ['foo' => 2, 'baz' => 3],
+            $result->hierarchy[0]->notes);
+
+        $this->assertEquals(
+            ['foo' => 1, 'bar' => 2],
+            $result->hierarchy[1]->notes);
     }
 
     public function testHierarchyNoteMergeNull()
