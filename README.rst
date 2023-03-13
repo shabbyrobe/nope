@@ -1,5 +1,4 @@
-**NOTE: This has been rendered obsolete with the addition of [Attributes](https://www.php.net/manual/en/language.attributes.overview.php)
-in PHP 8. It will receive no further updates.**
+**NOTE: This has been rendered obsolete with the addition of native support for attributes in PHP 8. It will receive no further updates.**
 
 ---
 
