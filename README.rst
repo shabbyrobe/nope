@@ -1,6 +1,6 @@
 **NOTE: This has been rendered obsolete with the addition of native support for attributes in PHP 8. It will receive no further updates.**
 
----
+-----
 
 Nope! - JSON Docblock Annotation Parser for PHP
 ===============================================
